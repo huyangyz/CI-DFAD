@@ -36,22 +36,22 @@ class Trainer(object):
         self.D.train()
         for e in range(1, self.opt['epoch']+1):
             start_time = time.time()
-            for step, ((recent_data, trend_data, day_data, time_feature), sub_graph, real_data, _, _) in enumerate(self.generator):
+            for step, ((hour_data, week_data, day_data, time_feature), sub_graph, real_data, _, _) in enumerate(self.generator):
                 valid = torch.zeros((real_data.shape[0], 1), dtype=torch.float)
                 fake = torch.ones((real_data.shape[0], 1), dtype=torch.float)
 
                 if self.opt['cuda']:
-                    recent_data, trend_data, day_data, real_data, sub_graph, time_feature, valid, fake = \
-                        recent_data.cuda(), trend_data.cuda(), day_data.cuda(), real_data.cuda(), sub_graph.cuda(), time_feature.cuda(), valid.cuda(), fake.cuda()
+                    hour_data, week_data, day_data, real_data, sub_graph, time_feature, valid, fake = \
+                        hour_data.cuda(), week_data.cuda(), day_data.cuda(), real_data.cuda(), sub_graph.cuda(), time_feature.cuda(), valid.cuda(), fake.cuda()
 
                     # Train Discriminator
                     self.D_optim.zero_grad()
-                    real_sequence = torch.cat([recent_data, real_data.unsqueeze(1)], dim=1)
-                    fake_data = self.G(recent_data, trend_data, day_data, sub_graph, time_feature)
-                    fake_sequence = torch.cat([recent_data, fake_data.unsqueeze(1)], dim=1)
+                    real_sequence = torch.cat([hour_data, real_data.unsqueeze(1)], dim=1)
+                    fake_data = self.G(hour_data, week_data, day_data, sub_graph, time_feature)
+                    fake_sequence = torch.cat([hour_data, fake_data.unsqueeze(1)], dim=1)
 
-                    real_loss = -self.D(real_sequence, sub_graph, trend_data, day_data).mean()
-                    fake_loss = self.D(fake_sequence, sub_graph, trend_data, day_data).mean()
+                    real_loss = -self.D(real_sequence, sub_graph, week_data, day_data).mean()
+                    fake_loss = self.D(fake_sequence, sub_graph, week_data, day_data).mean()
                     D_total = real_loss + fake_loss
 
                     D_total.backward(retain_graph=True)
@@ -62,10 +62,10 @@ class Trainer(object):
                         p.data.clamp_(-0.05, 0.05)  # weight clipping
 
                     self.G_optim.zero_grad()
-                    fake_data = self.G(recent_data, trend_data, day_data, sub_graph, time_feature)
+                    fake_data = self.G(hour_data, week_data, day_data, sub_graph, time_feature)
                     mse_loss = self.G_loss(fake_data, real_data)
-                    fake_sequence = torch.cat([recent_data, fake_data.unsqueeze(1)], dim=1)
-                    fake_loss = -self.D(fake_sequence, sub_graph, trend_data, day_data).mean()
+                    fake_sequence = torch.cat([hour_data, fake_data.unsqueeze(1)], dim=1)
+                    fake_loss = -self.D(fake_sequence, sub_graph, week_data, day_data).mean()
 
                     G_total = self.opt['lambda_G'] * mse_loss + fake_loss+ 0.1*self.G.uncertainty_aware_modeling.fc.kl_loss() \
                               + 0.1*self.G.long_term_nonlinear_encoder.nonlinear_encoder_layer.regularization_loss()+0.1*self.G.two_layer_nonlinear_encoder[0].regularization_loss()
