@@ -52,21 +52,21 @@ class Tester(object):
                             m.eval()
 
         for step, (
-                (recent_data, trend_data, day_data, time_feature), sub_graph, real_data, index_t, index_r) in enumerate(
+                (hour_data, week_data, day_data, time_feature), sub_graph, real_data, index_t, index_r) in enumerate(
             self.generator):
 
             if self.opt['cuda']:
-                recent_data = recent_data.cuda()
-                trend_data = trend_data.cuda()
+                hour_data = hour_data.cuda()
+                week_data = week_data.cuda()
                 day_data = day_data.cuda()
                 real_data = real_data.cuda()
                 sub_graph = sub_graph.cuda()
                 time_feature = time_feature.cuda()
 
-            real_sequence = torch.cat([recent_data, real_data.unsqueeze(1)], dim=1)
+            real_sequence = torch.cat([hour_data, real_data.unsqueeze(1)], dim=1)
 
-            single_fake = self.G(recent_data, trend_data, day_data, sub_graph, time_feature)
-            fake_sequence_single = torch.cat([recent_data, single_fake.unsqueeze(1)], dim=1)
+            single_fake = self.G(hour_data, week_data, day_data, sub_graph, time_feature)
+            fake_sequence_single = torch.cat([hour_data, single_fake.unsqueeze(1)], dim=1)
 
 
             with torch.no_grad():
@@ -74,7 +74,7 @@ class Tester(object):
                 _set_dropout_mode(self.G, 'train')
                 samples = []
                 for _ in range(mc_samples):
-                    s = self.G(recent_data, trend_data, day_data, sub_graph, time_feature)  # (batch, node, feat)
+                    s = self.G(hour_data, week_data, day_data, sub_graph, time_feature)  # (batch, node, feat)
                     samples.append(s.unsqueeze(0))
                 samples = torch.cat(samples, dim=0)
 
@@ -90,12 +90,12 @@ class Tester(object):
             mse_mu_per_sample = ((mu - real_data) ** 2).mean(dim=2).mean(dim=1)
             uncertainty_score_batch = anomaly_per_feat.mean(dim=2).mean(dim=1)
 
-            fake_sequence_mu = torch.cat([recent_data, mu.unsqueeze(1)], dim=1)
+            fake_sequence_mu = torch.cat([hour_data, mu.unsqueeze(1)], dim=1)
 
             real_score_D = self.D(real_sequence, sub_graph)
             fake_score_D = self.D(fake_sequence_mu, sub_graph)
 
-            batch_size = recent_data.shape[0]
+            batch_size = hour_data.shape[0]
             for b in range(batch_size):
                 t_idx = index_t[b].item()
                 r_idx = index_r[b].item()
