@@ -59,7 +59,7 @@ CI-DFAD/
   main.py
 ```
 
-The three large source datasets (NYC, Chicago, and PeMS) and the pretrained models can be downloaded from the following link:
+The three large source datasets (NYC, Chicago, and PeMS) and the pretrained models can be downloaded from the following link: https://drive.google.com/drive/folders/1U4ehoLEV83JLpPIXbopng0ydwfOAFLqN
 
 Generate the NYC DRP tensors from the project root with:
 
