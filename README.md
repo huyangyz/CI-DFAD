@@ -1,4 +1,4 @@
-# CI-DFAD
+<img width="1503" height="659" alt="image" src="https://github.com/user-attachments/assets/26e668c1-4b7a-4305-beed-be23e2e3cc60" /># CI-DFAD
 
 Reference implementation of **Cross-Scale Interactive Dynamic Feature
 Learning and Adversarial Detection for Spatiotemporal Traffic Anomalies**.
@@ -59,7 +59,7 @@ CI-DFAD/
   main.py
 ```
 
-The three large source datasets (NYC, Chicago, and PeMS) and the pretrained models can be downloaded from the following link: https://drive.google.com/drive/folders/1U4ehoLEV83JLpPIXbopng0ydwfOAFLqN
+The three large source datasets (NYC, Chicago, and PeMS) and the pretrained models can be downloaded from the following link: https://data.mendeley.com/preview/trr94mt9p5?a=0d676f5d-7c54-4576-9d7d-4813d74407c0
 
 Generate the NYC DRP tensors from the project root with:
 
